@@ -13,7 +13,7 @@ function entity_modified_schema() {
     'fields' => array(
       'entity_type' => array(
         'type' => 'varchar',
-        'length' => 32,
+        'length' => 128,
         'not null' => TRUE,
         'default' => '',
         'description' => 'The entity type this modified tracker refers to.',
@@ -40,10 +40,25 @@ function entity_modified_schema() {
 }
 
 /**
- * Enlarge entity_id to big int for upgrades from Drupal 7.
+ * Enlarge entity_type and entity_id columns for upgrades from Drupal 7.
  */
 function entity_modified_update_1000() {
-  $schema = entity_modified_schema();
-  $column = $schema['entity_modified']['fields']['entity_id'];
-  db_change_field('entity_modified', 'entity_id', 'entity_id', $column);
+  $entity_type_column = array(
+    'type' => 'varchar',
+    'length' => 128,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => 'The entity type this modified tracker refers to.',
+  );
+  db_change_field('entity_modified', 'entity_type', 'entity_type', $entity_type_column);
+
+  $entity_id_column = array(
+    'type' => 'int',
+    'size' => 'big',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'description' => 'The entity ID this modified tracker refers to.',
+  );
+  db_change_field('entity_modified', 'entity_id', 'entity_id', $entity_id_column);
 }
