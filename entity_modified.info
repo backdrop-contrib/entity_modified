@@ -1,4 +1,5 @@
+type = module
 name = Entity modified
 description = Read the last modified date from an entity, supports entities which do support a last modified natively.
 package = Performance and scalability
-core = 7.x
+backdrop = 1.x

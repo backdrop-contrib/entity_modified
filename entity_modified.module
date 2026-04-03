@@ -1,8 +1,8 @@
 <?php
-
 /**
  * @file
- * Hook implementations and frequently used functions for entity modified module.
+ * Hook implementations and frequently used functions for entity modified
+ * module.
  */
 
 /**
@@ -82,15 +82,15 @@ function entity_modified_last($entity_type, $entity) {
 /**
  * Retrieve the last time an entity was modified - using an ID.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type of the entity.
- * @param $entity_id
+ * @param int $entity_id
  *   The entity id of the entity.
  *
- * @return timestamp
+ * @return int
  *   Returns the last modified timestamp for the given entity_type, entity_id.
  */
-function entity_modified_last_id($entity_type, $entity_id) {
+function entity_modified_last_id(string $entity_type, int $entity_id) {
   $modified_timestamp = db_query(
     'SELECT modified FROM {entity_modified} WHERE entity_type = :entity_type AND entity_id = :entity_id',
     array(':entity_type' => $entity_type, ':entity_id' => $entity_id)
@@ -128,28 +128,26 @@ function entity_modified_property_name($entity_type = NULL) {
  * Implements hook_entity_info_alter().
  */
 function entity_modified_entity_info_alter(&$entity_info) {
- foreach (entity_modified_supported_core_entities(TRUE) as $type => $property) {
-   $entity_info[$type]['modified property name'] = $property;
- }
+  foreach (entity_modified_supported_core_entities(TRUE) as $type => $property) {
+    $entity_info[$type]['modified property name'] = $property;
+  }
 }
 
 /**
  * Eating own dog food, define unique identifiers for entity types this module
  * is aware of.
  *
- * @param $enabled
+ * @param bool $enabled
  *   If set, only return enabled modules.
  *
- * @return $modified_property_names.
+ * @return array $modified_property_names
  *   Array of modified property names keyed by entity_type.
  */
-function entity_modified_supported_core_entities($enabled = FALSE) {
+function entity_modified_supported_core_entities(bool $enabled = FALSE) {
   $modified_property_names = array();
   // Core entity types.
   $modified_property_names['comment'] = 'changed';
   $modified_property_names['node'] = 'changed';
-
-  // File entity module.
   $modified_property_names['file'] = 'timestamp';
 
   if ($enabled) {

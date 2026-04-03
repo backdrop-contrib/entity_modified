@@ -1,4 +1,8 @@
+type = module
 name = Entity modified - Node Queue support
 description = Adds support for node queues. Also uses a fake 'entity' type to get modified timestamps of subqueues.
 package = Performance and scalability
-core = 7.x
+backdrop = 1.x
+
+dependencies[] = entity_modified
+dependencies[] = nodequeue

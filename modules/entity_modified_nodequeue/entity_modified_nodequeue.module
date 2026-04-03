@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hook implementations and frequently used functions for entity modified - nodequeue module.
@@ -43,6 +42,9 @@ function entity_modified_nodequeue_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+/**
+ * Submit handler for nodequeue arrange form.
+ */
 function entity_modified_nodequeue_form_submit($form, $form_state) {
   $sqid = $form['nodes']['#subqueue']['sqid'];
   entity_modified_nodequeue_update_modified($sqid);
