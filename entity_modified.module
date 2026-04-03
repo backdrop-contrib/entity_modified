@@ -6,6 +6,37 @@
  */
 
 /**
+ * Implements hook_entity_load().
+ */
+function entity_modified_entity_load($entities, $type) {
+  $load_ids = array();
+
+  if ($name = entity_modified_property_name($type)) {
+    // If native modified timestamp known.
+    foreach ($entities as $id => $entity) {
+      if (isset($entity->$name)) {
+        $entity->entity_modified = $entity->$name;
+      }
+      else {
+        $load_ids[] = $id;
+      }
+    }
+  }
+  else {
+    $load_ids = array_keys($entities);
+  }
+
+  if ($load_ids) {
+    // Retrieve last modified timestamps from our custom table.
+    $data = db_query("SELECT entity_id, modified FROM {entity_modified} WHERE entity_type = :type AND entity_id IN (:ids)", array(':type' => $type, ':ids' => $load_ids))->fetchAllKeyed();
+    foreach ($entities as $id => $entity) {
+      // Use a default of '1' if the last modified timestamp was not available.
+      $entity->entity_modified = isset($data[$id]) ? $data[$id] : 1;
+    }
+  }
+}
+
+/**
  * Implements hook_entity_delete().
  *
  * Delete our custom stored entity modified record when the entity is deleted.
@@ -33,9 +64,14 @@ function entity_modified_entity_insert($entity, $type) {
  * Implements hook_entity_update().
  */
 function entity_modified_entity_update($entity, $type) {
-  // If the module does not have a modified property that we know about then
-  // insert or update.
-  if (!entity_modified_property_name($type)) {
+  $name = entity_modified_property_name($type);
+  if ($name && isset($entity->$name)) {
+    $entity->entity_modified = $entity->$name;
+  }
+  else {
+    // If the module does not have a modified property that we know about then
+    // insert or update.
+    $entity->entity_modified = REQUEST_TIME;
     list($entity_id) = entity_extract_ids($type, $entity);
     db_merge('entity_modified')
       ->key(array(
@@ -45,7 +81,7 @@ function entity_modified_entity_update($entity, $type) {
       ->fields(array(
         'entity_type' => $type,
         'entity_id' => $entity_id,
-        'modified' => REQUEST_TIME,
+        'modified' => $entity->entity_modified,
       ))
       ->execute();
   }
@@ -55,28 +91,7 @@ function entity_modified_entity_update($entity, $type) {
  * Retrieve the last time an entity was modified.
  */
 function entity_modified_last($entity_type, $entity) {
-  $name = entity_modified_property_name($entity_type);
-
-  // If native modified timestamp known.
-  if ($name) {
-    return $entity->$name;
-  }
-
-  // Retrieve entity's last modified from our custom table.
-  list($entity_id) = entity_extract_ids($entity_type, $entity);
-
-  $modified_timestamp = db_query(
-    'SELECT modified FROM {entity_modified} WHERE entity_type = :entity_type AND entity_id = :entity_id',
-    array(':entity_type' => $entity_type, ':entity_id' => $entity_id)
-  )->fetchField();
-
-  // If not found then use '1' as inserting something in a read-only operation
-  // is a bad idea.
-  if (!$modified_timestamp) {
-    $modified_timestamp = 1;
-  }
-
-  return $modified_timestamp;
+  return !empty($entity->entity_modified) ? $entity->entity_modified : 1;
 }
 
 /**
