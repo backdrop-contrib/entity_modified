@@ -177,3 +177,28 @@ function entity_modified_supported_core_entities(bool $enabled = FALSE) {
 
   return $modified_property_names;
 }
+
+/**
+ * Implements hook_modules_uninstalled().
+ *
+ * Cleans up deleted entities from table.
+ */
+function entity_modified_modules_uninstalled($modules) {
+  $entities = array();
+  foreach ($modules as $module) {
+    $function = $module . '_entity_info';
+    module_load_include('module', $module);
+    if (function_exists($function)) {
+      $module_entities = $function();
+      if (!empty($module_entities)) {
+        $entities = array_merge($entities, array_keys($module_entities));
+      }
+    }
+  }
+
+  if (!empty($entities)) {
+    db_delete('entity_modified')
+      ->condition('entity_type', $entities)
+      ->execute();
+  }
+}
