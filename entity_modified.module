@@ -130,13 +130,17 @@ function entity_modified_last_id(string $entity_type, int $entity_id) {
  *   - Returns the modified property name for the given entity_type if it exists.
  *   - Else it returns FALSE.
  */
-function entity_modified_property_name($entity_type = NULL) {
-  $info = entity_get_info($entity_type);
-
-  if (isset($info['modified property name'])) {
-    return $info['modified property name'];
+function entity_modified_property_name($entity_type) {
+  $properties = &backdrop_static(__FUNCTION__);
+  if (!isset($properties)) {
+    $properties = array();
+    foreach (entity_get_info() as $type => $info) {
+      if (isset($info['modified property name'])) {
+        $properties[$type] = $info['modified property name'];
+      }
+    }
   }
-  return FALSE;
+  return $properties[$entity_type] ?? FALSE;
 }
 
 /**
