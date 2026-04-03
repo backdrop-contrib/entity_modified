@@ -20,6 +20,7 @@ function entity_modified_schema() {
       ),
       'entity_id' => array(
         'type' => 'int',
+        'size' => 'big',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
@@ -38,3 +39,11 @@ function entity_modified_schema() {
   return $schema;
 }
 
+/**
+ * Enlarge entity_id to big int for upgrades from Drupal 7.
+ */
+function entity_modified_update_1000() {
+  $schema = entity_modified_schema();
+  $column = $schema['entity_modified']['fields']['entity_id'];
+  db_change_field('entity_modified', 'entity_id', 'entity_id', $column);
+}
