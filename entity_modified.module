@@ -5,6 +5,8 @@
  * module.
  */
 
+module_load_include('inc', 'entity_modified', 'includes/views/entity_modified.views');
+
 /**
  * Implements hook_entity_load().
  */
@@ -201,4 +203,14 @@ function entity_modified_modules_uninstalled($modules) {
       ->condition('entity_type', $entities)
       ->execute();
   }
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function entity_modified_views_api() {
+  return array(
+    'api' => 3,
+    'path' => backdrop_get_path('module', 'entity_modified') . '/includes/views',
+  );
 }
